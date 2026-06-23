@@ -1,0 +1,147 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import API_BASE_URL from "../../config/api";
+
+function PptToPdf() {
+  const navigate = useNavigate();
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Select PPT
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+
+    if (
+      selectedFile &&
+      (selectedFile.name.endsWith(".ppt") ||
+        selectedFile.name.endsWith(".pptx"))
+    ) {
+      setFile(selectedFile);
+    } else {
+      alert("Only PPT or PPTX files are allowed");
+    }
+  };
+
+  // Convert PPT → PDF
+  const convertPptToPdf = async () => {
+    try {
+      if (!file) {
+        alert("Please upload PPT file");
+        return;
+      }
+
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await axios.post(
+        `${API_BASE_URL}/pdf/ppt-to-pdf`,
+        formData,
+        {
+          responseType: "blob",
+        },
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.setAttribute("download", "converted.pdf");
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.remove();
+    } catch (error) {
+      console.error(error);
+
+      const errorMessage = await error.response?.data?.text?.();
+
+      alert(errorMessage || "PPT to PDF conversion failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-[#070B17] text-white">
+      <div className="max-w-4xl mx-auto px-6 py-14">
+        {/* Back */}
+        <button
+          onClick={() => navigate("/pdf-tools")}
+          className="text-gray-400 hover:text-orange-400 transition mb-8"
+        >
+          ← Back
+        </button>
+
+        {/* Hero */}
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto rounded-3xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-4xl mb-5">
+            📽️
+          </div>
+
+          <h1 className="text-5xl font-black">PPT to PDF</h1>
+
+          <p className="mt-4 text-gray-400 text-lg">
+            Convert PowerPoint presentations into PDF.
+          </p>
+        </div>
+
+        {/* Main Card */}
+        <div className="mt-12 rounded-[32px] border border-white/10 bg-[#101827] p-8">
+          {/* Upload */}
+          <label className="flex flex-col items-center justify-center h-[240px] rounded-[28px] border border-dashed border-orange-500/30 bg-[#0F172A] cursor-pointer hover:border-orange-500 transition">
+            <input
+              type="file"
+              accept=".ppt,.pptx"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+
+            <span className="text-6xl">📽️</span>
+
+            <p className="mt-5 text-xl font-semibold">Select PPT File</p>
+
+            <p className="text-sm text-gray-500 mt-2">
+              Upload PPT or PPTX file
+            </p>
+          </label>
+
+          {/* Selected File */}
+          {file && (
+            <div className="mt-5 rounded-2xl bg-[#0F172A] border border-white/10 p-5">
+              <p className="font-medium">{file.name}</p>
+
+              <p className="text-sm text-gray-400">
+                {(file.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </div>
+          )}
+
+          {/* Info */}
+          <div className="mt-5 rounded-2xl bg-orange-500/10 border border-orange-500/20 p-4">
+            <p className="text-sm text-orange-300">
+              PPT slides will be converted into PDF pages while keeping layout
+              and formatting.
+            </p>
+          </div>
+
+          {/* Convert Button */}
+          <button
+            onClick={convertPptToPdf}
+            disabled={loading}
+            className="w-full mt-8 h-14 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 font-semibold text-lg hover:opacity-90 transition disabled:opacity-50"
+          >
+            {loading ? "Converting..." : "Convert to PDF"}
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default PptToPdf;
