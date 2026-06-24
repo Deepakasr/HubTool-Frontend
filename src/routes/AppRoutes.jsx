@@ -2,7 +2,9 @@ import { Routes, Route } from "react-router-dom";
 
 import Home from "../pages/home/Home";
 
+// AI Tools Import ----
 import ChatAssistant from "../pages/tools/ai/ChatAssistant";
+import AiImageGenerator from "../pages/tools/ai/AiImageGenerator";
 
 // Category Pages
 import PdfToolsPage from "../pages/category/PdfToolsPage";
@@ -54,6 +56,7 @@ function AppRoutes() {
 
       {/* AI Tools */}
       <Route path="/ai-tools/chat-assistant" element={<ChatAssistant />} />
+      <Route path="/ai-tools/image-generator" element={<AiImageGenerator />} />
 
       {/* ImageToolsPage */}
       <Route path="/image-tools/image-compress" element={<ImageCompress />} />
